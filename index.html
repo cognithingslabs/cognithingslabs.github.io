@@ -1,50 +1,692 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CogniThings Labs</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            text-align:center;
-            padding:100px 20px;
-            background:#0f172a;
-            color:white;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CogniThings Labs</title>
 
-        h1{
-            font-size:4rem;
-            margin-bottom:10px;
-        }
+  <style>
+    :root {
+      --bg: #050712;
+      --bg-soft: #090d1f;
+      --text: #eef3ff;
+      --muted: #9aa7c7;
+      --cyan: #54f4ff;
+      --violet: #8b5cff;
+      --pink: #ff4fd8;
+      --glass: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.16);
+    }
 
-        p{
-            font-size:1.2rem;
-            color:#cbd5e1;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .btn{
-            display:inline-block;
-            margin-top:30px;
-            padding:12px 24px;
-            background:#3b82f6;
-            color:white;
-            text-decoration:none;
-            border-radius:8px;
-        }
-    </style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(84, 244, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(139, 92, 255, 0.22), transparent 32%),
+        radial-gradient(circle at 50% 90%, rgba(255, 79, 216, 0.12), transparent 34%),
+        #050712;
+      z-index: -3;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E");
+      z-index: -2;
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(84,244,255,0.16), transparent 65%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      transition: 0.08s ease-out;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(18px);
+      opacity: 0.7;
+      animation: float 9s ease-in-out infinite;
+    }
+
+    .orb.one {
+      width: 260px;
+      height: 260px;
+      background: rgba(84,244,255,0.18);
+      top: 14%;
+      left: 8%;
+    }
+
+    .orb.two {
+      width: 340px;
+      height: 340px;
+      background: rgba(139,92,255,0.22);
+      right: 8%;
+      top: 28%;
+      animation-delay: -3s;
+    }
+
+    .orb.three {
+      width: 220px;
+      height: 220px;
+      background: rgba(255,79,216,0.17);
+      left: 48%;
+      bottom: 8%;
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-28px) translateX(18px); }
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      backdrop-filter: blur(18px);
+      background: rgba(5, 7, 18, 0.68);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    nav {
+      max-width: 1180px;
+      margin: auto;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      font-size: 1.25rem;
+    }
+
+    .logo span {
+      color: var(--cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--cyan);
+    }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: 0;
+      color: white;
+      font-size: 1.7rem;
+      cursor: pointer;
+    }
+
+    section {
+      max-width: 1180px;
+      margin: auto;
+      padding: 110px 24px;
+      position: relative;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      max-width: 900px;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--glass);
+      color: var(--cyan);
+      margin-bottom: 24px;
+      backdrop-filter: blur(16px);
+      font-size: 0.9rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 9vw, 7.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.08em;
+      margin-bottom: 26px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      max-width: 720px;
+      margin: auto;
+    }
+
+    .hero-actions {
+      margin-top: 38px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: white;
+      border: 1px solid var(--border);
+      transition: 0.35s;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      color: #02040c;
+      font-weight: 800;
+      box-shadow: 0 0 35px rgba(84,244,255,0.28);
+    }
+
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    }
+
+    .network {
+      position: absolute;
+      inset: 0;
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .section-title {
+      margin-bottom: 44px;
+      max-width: 760px;
+    }
+
+    .section-title h2 {
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -0.06em;
+      margin-bottom: 14px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .card {
+      padding: 30px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.04));
+      border: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+      transition: 0.35s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(84,244,255,0.22), transparent 35%);
+      opacity: 0;
+      transition: 0.35s;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(84,244,255,0.42);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card h3 {
+      position: relative;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      position: relative;
+      color: var(--muted);
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, rgba(84,244,255,0.25), rgba(139,92,255,0.25));
+      border: 1px solid rgba(255,255,255,0.15);
+      font-size: 1.35rem;
+    }
+
+    .about-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .lab-panel {
+      min-height: 420px;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(84,244,255,0.14), transparent),
+        linear-gradient(315deg, rgba(255,79,216,0.12), transparent),
+        rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lab-panel::before {
+      content: "";
+      position: absolute;
+      width: 180%;
+      height: 180%;
+      top: -40%;
+      left: -40%;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      transform: perspective(600px) rotateX(62deg);
+      animation: gridMove 12s linear infinite;
+    }
+
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to { background-position: 84px 84px; }
+    }
+
+    .pulse-node {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 25px var(--cyan);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    .pulse-node:nth-child(1) { top: 30%; left: 25%; }
+    .pulse-node:nth-child(2) { top: 54%; left: 58%; animation-delay: -0.8s; }
+    .pulse-node:nth-child(3) { top: 70%; left: 38%; animation-delay: -1.4s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.8); opacity: 1; }
+    }
+
+    .why {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .contact-box {
+      padding: 44px;
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(84,244,255,0.14), rgba(139,92,255,0.12)),
+        rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.07);
+      color: white;
+      outline: none;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--cyan);
+    }
+
+    footer {
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @media (max-width: 900px) {
+      .grid, .why, .about-layout, .contact-box {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 70px;
+        right: 24px;
+        width: calc(100% - 48px);
+        padding: 22px;
+        border-radius: 22px;
+        background: rgba(5,7,18,0.92);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        display: none;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      section {
+        padding: 90px 20px;
+      }
+
+      .lab-panel {
+        min-height: 300px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <div class="noise"></div>
+  <div class="cursor-glow"></div>
 
-<h1>CogniThings Labs</h1>
+  <header>
+    <nav>
+      <div class="logo">CogniThings <span>Labs</span></div>
+      <button class="menu-btn" aria-label="Open menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#why">Why Us</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<p>
-Building intelligent AI, automation, and IoT solutions for the future.
-</p>
+  <main>
+    <section class="hero">
+      <canvas class="network"></canvas>
+      <div class="orb one"></div>
+      <div class="orb two"></div>
+      <div class="orb three"></div>
 
-<a href="mailto:hello@cognithings.com" class="btn">
-Contact Us
-</a>
+      <div class="hero-content">
+        <div class="eyebrow">AI × IoT × Edge Intelligence</div>
+        <h1>CogniThings <span class="gradient-text">Labs</span></h1>
+        <p>Generating Intelligence for Connected Things — building adaptive AI systems, smart devices, and autonomous connected experiences for the next industrial frontier.</p>
 
+        <div class="hero-actions">
+          <a href="#services" class="btn primary">Explore Capabilities</a>
+          <a href="#contact" class="btn">Start a Project</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="about-layout">
+        <div>
+          <div class="section-title">
+            <h2>Where connected things become cognitive.</h2>
+            <p>CogniThings Labs designs intelligent systems that sense, reason, learn, and act across connected environments.</p>
+          </div>
+          <p style="color: var(--muted);">
+            We combine Generative AI, embedded intelligence, sensor fusion, edge computing, and cloud-native architecture to help products evolve from connected devices into adaptive digital organisms.
+          </p>
+        </div>
+
+        <div class="lab-panel">
+          <span class="pulse-node"></span>
+          <span class="pulse-node"></span>
+          <span class="pulse-node"></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="section-title">
+        <h2>Services</h2>
+        <p>Experimental, production-ready intelligence for modern connected ecosystems.</p>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="icon">🧠</div>
+          <h3>Generative AI Systems</h3>
+          <p>Custom AI agents, copilots, automation workflows, and intelligent interfaces for connected products.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">📡</div>
+          <h3>IoT Intelligence</h3>
+          <p>Smart device logic, telemetry pipelines, predictive analytics, and real-time connected infrastructure.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Edge AI Prototyping</h3>
+          <p>Low-latency AI models, embedded inference, anomaly detection, and sensor-driven automation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="why">
+      <div class="section-title">
+        <h2>Why Choose Us</h2>
+        <p>Built for teams creating future-ready products, platforms, and intelligent machines.</p>
+      </div>
+
+      <div class="grid why">
+        <div class="card">
+          <h3>01</h3>
+          <p>AI-first product thinking.</p>
+        </div>
+        <div class="card">
+          <h3>02</h3>
+          <p>Rapid experimental prototyping.</p>
+        </div>
+        <div class="card">
+          <h3>03</h3>
+          <p>Secure, scalable architecture.</p>
+        </div>
+        <div class="card">
+          <h3>04</h3>
+          <p>Human-centered intelligent design.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="contact-box">
+        <div>
+          <h2>Build the next cognitive device ecosystem.</h2>
+          <p style="color: var(--muted); margin-top: 14px;">
+            Partner with CogniThings Labs to prototype, deploy, and scale intelligent connected systems.
+          </p>
+        </div>
+
+        <form>
+          <input type="text" placeholder="Your Name" required />
+          <input type="email" placeholder="Email Address" required />
+          <textarea placeholder="Tell us about your project"></textarea>
+          <button class="btn primary" type="submit">Send Message</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 CogniThings Labs. Generating Intelligence for Connected Things.
+  </footer>
+
+  <script>
+    const cursorGlow = document.querySelector(".cursor-glow");
+    const menuBtn = document.querySelector(".menu-btn");
+    const navLinks = document.querySelector(".nav-links");
+
+    document.addEventListener("mousemove", (e) => {
+      cursorGlow.style.left = e.clientX + "px";
+      cursorGlow.style.top = e.clientY + "px";
+    });
+
+    menuBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+    });
+
+    document.querySelectorAll(".nav-links a").forEach(link => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("active");
+      });
+    });
+
+    const canvas = document.querySelector(".network");
+    const ctx = canvas.getContext("2d");
+
+    let nodes = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      nodes = Array.from({ length: window.innerWidth < 768 ? 38 : 76 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35
+      }));
+    }
+
+    function animateNetwork() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      nodes.forEach((node, i) => {
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(84,244,255,0.65)";
+        ctx.fill();
+
+        for (let j = i + 1; j < nodes.length; j++) {
+          const other = nodes[j];
+          const dx = node.x - other.x;
+          const dy = node.y - other.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 135) {
+            ctx.beginPath();
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.strokeStyle = `rgba(139,92,255,${1 - distance / 135})`;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+        }
+      });
+
+      requestAnimationFrame(animateNetwork);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    animateNetwork();
+
+    document.querySelector("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Thank you for contacting CogniThings Labs.");
+    });
+  </script>
 </body>
 </html>
